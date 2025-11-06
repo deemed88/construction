@@ -93,6 +93,13 @@ export const Inventory: React.FC<InventoryProps> = ({ projectId, currentUser }) 
     setIsGenerating(true);
     setError('');
     setAiReport('');
+
+    if (!process.env.API_KEY) {
+      setError("API key is not configured. Please set the API_KEY environment variable in your Netlify deployment settings.");
+      setIsGenerating(false);
+      return;
+    }
+      
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const today = new Date().toISOString().split('T')[0];

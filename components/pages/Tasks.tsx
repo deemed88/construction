@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { Task, User, UserRole } from '../../types';
-import { PlusIcon } from '@heroicons/react/24/solid';
+import { PlusIcon, PlayCircleIcon } from '@heroicons/react/24/solid';
 import { EllipsisHorizontalIcon, PaperClipIcon, ChatBubbleBottomCenterTextIcon } from '@heroicons/react/24/outline';
-import { mockTasks } from '../../mockData';
+import { mockTasks, mockUsers } from '../../mockData';
 import { Modal } from '../Modal';
 import { NewTaskForm } from '../forms/NewTaskForm';
 
@@ -12,6 +12,15 @@ const TaskCard: React.FC<{ task: Task }> = ({ task }) => {
         Medium: 'bg-yellow-500',
         Low: 'bg-green-500',
     };
+    const audioRef = useRef<HTMLAudioElement>(null);
+
+    const playAudio = (e: React.MouseEvent) => {
+        e.stopPropagation(); // prevent card drag from starting
+        if (audioRef.current) {
+            audioRef.current.play().catch(error => console.error("Audio play failed:", error));
+        }
+    };
+
     return (
         <div className="bg-white p-4 rounded-lg shadow border border-gray-200 mb-4 cursor-grab active:cursor-grabbing">
             <div className="flex justify-between items-center mb-2">
@@ -30,6 +39,14 @@ const TaskCard: React.FC<{ task: Task }> = ({ task }) => {
                 <div className="flex items-center space-x-2 text-sm text-gray-500">
                      <span className="flex items-center"><ChatBubbleBottomCenterTextIcon className="w-4 h-4 mr-1" /> 2</span>
                      <span className="flex items-center"><PaperClipIcon className="w-4 h-4 mr-1" /> 3</span>
+                     {task.audioMemoUrl && (
+                        <>
+                            <button onClick={playAudio} title="Play voice memo" className="flex items-center text-brand-blue-600 hover:text-brand-blue-800">
+                                <PlayCircleIcon className="w-5 h-5" />
+                            </button>
+                            <audio ref={audioRef} src={task.audioMemoUrl} className="hidden" />
+                        </>
+                     )}
                 </div>
                 {task.assignee ? (
                     <img src={task.assignee.avatarUrl} alt={task.assignee.name} title={task.assignee.name} className="w-8 h-8 rounded-full ring-2 ring-white" />
@@ -81,6 +98,7 @@ interface TasksProps {
 export const Tasks: React.FC<TasksProps> = ({ projectId, currentUser }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTaskStatus, setModalTaskStatus] = useState<'To Do' | 'In Progress' | 'Done'>('To Do');
+  const [taskTrigger, setTaskTrigger] = useState(0);
   
   const projectTasks = useMemo(() => {
     const allTasks = mockTasks.filter(t => t.projectId === projectId);
@@ -92,7 +110,7 @@ export const Tasks: React.FC<TasksProps> = ({ projectId, currentUser }) => {
     
     // For Team Members and Clients, show only their assigned tasks
     return allTasks.filter(task => task.assignee?.id === currentUser.id);
-  }, [projectId, currentUser]);
+  }, [projectId, currentUser, taskTrigger]);
 
   const handleAddTaskClick = (status: 'To Do' | 'In Progress' | 'Done') => {
     setModalTaskStatus(status);
@@ -100,7 +118,18 @@ export const Tasks: React.FC<TasksProps> = ({ projectId, currentUser }) => {
   };
   
   const handleAddTask = (taskData: any) => {
-    console.log('New Task:', { ...taskData, status: modalTaskStatus, projectId });
+    const newTask: Task = {
+        id: `t-${Date.now()}`,
+        projectId: projectId,
+        title: taskData.title,
+        status: modalTaskStatus,
+        dueDate: taskData.dueDate,
+        priority: taskData.priority,
+        assignee: taskData.assigneeId ? mockUsers.find(u => u.id === taskData.assigneeId) : undefined,
+        audioMemoUrl: taskData.audioMemoUrl,
+    };
+    mockTasks.push(newTask);
+    setTaskTrigger(t => t + 1); // Trigger re-render
     setIsModalOpen(false);
   };
 

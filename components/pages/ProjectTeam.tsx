@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
-import { PlusIcon } from '@heroicons/react/24/solid';
+import { PlusIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/solid';
 import { User, UserRole } from '../../types';
 import { mockProjects } from '../../mockData';
 import { Modal } from '../Modal';
 import { AddProjectMemberForm } from '../forms/AddProjectMemberForm';
+import { MemberPermissionsForm } from '../forms/MemberPermissionsForm';
 
 const roleClasses: { [key in UserRole]: string } = {
     [UserRole.ADMIN]: 'bg-red-100 text-red-800',
@@ -20,7 +21,10 @@ interface ProjectTeamProps {
 }
 
 export const ProjectTeam: React.FC<ProjectTeamProps> = ({ projectId, currentUser }) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isPermModalOpen, setIsPermModalOpen] = useState(false);
+    const [selectedMember, setSelectedMember] = useState<User | null>(null);
+    
     const project = mockProjects.find(p => p.id === projectId);
     const [members, setMembers] = useState<User[]>(project?.members || []);
 
@@ -31,7 +35,11 @@ export const ProjectTeam: React.FC<ProjectTeamProps> = ({ projectId, currentUser
             ...memberData,
         };
         setMembers(prev => [...prev, newUser]);
-        setIsModalOpen(false);
+        // Update mock data
+        if (project) {
+            project.members.push(newUser);
+        }
+        setIsAddModalOpen(false);
     };
 
     const handleRemoveMember = (memberIdToRemove: string) => {
@@ -40,7 +48,28 @@ export const ProjectTeam: React.FC<ProjectTeamProps> = ({ projectId, currentUser
 
         if (window.confirm(`Are you sure you want to remove ${memberToRemove.name} from this project?`)) {
             setMembers(prev => prev.filter(member => member.id !== memberIdToRemove));
+            // Update mock data
+            if (project) {
+                project.members = project.members.filter(m => m.id !== memberIdToRemove);
+            }
         }
+    };
+
+    const handleOpenPermissions = (member: User) => {
+        setSelectedMember(member);
+        setIsPermModalOpen(true);
+    };
+
+    const handleSavePermissions = (userId: string, allowedTabs: string[]) => {
+        if (project) {
+            if (!project.memberPermissions) {
+                project.memberPermissions = {};
+            }
+            project.memberPermissions[userId] = allowedTabs;
+        }
+        setIsPermModalOpen(false);
+        setSelectedMember(null);
+        alert("Permissions updated successfully.");
     };
 
     const canManageTeam = [UserRole.ADMIN, UserRole.COMPANY_OWNER, UserRole.PROJECT_MANAGER].includes(currentUser.role);
@@ -51,16 +80,28 @@ export const ProjectTeam: React.FC<ProjectTeamProps> = ({ projectId, currentUser
 
     return (
         <>
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add Member to Project">
-                <AddProjectMemberForm onClose={() => setIsModalOpen(false)} onAddMember={handleAddMember} />
+            <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Add Member to Project">
+                <AddProjectMemberForm onClose={() => setIsAddModalOpen(false)} onAddMember={handleAddMember} />
             </Modal>
+            
+            {selectedMember && (
+                <Modal isOpen={isPermModalOpen} onClose={() => setIsPermModalOpen(false)} title="Manage Tab Access">
+                    <MemberPermissionsForm 
+                        member={selectedMember} 
+                        project={project} 
+                        onSave={handleSavePermissions} 
+                        onClose={() => setIsPermModalOpen(false)} 
+                    />
+                </Modal>
+            )}
+
             <div>
                 <div className="flex flex-col md:flex-row justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold text-gray-800 mb-4 md:mb-0">Project Team</h2>
                     {canManageTeam && (
                         <div className="flex items-center space-x-4">
                             <button
-                                onClick={() => setIsModalOpen(true)}
+                                onClick={() => setIsAddModalOpen(true)}
                                 className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-brand-blue-600 rounded-lg hover:bg-brand-blue-700 shadow"
                             >
                                 <PlusIcon className="h-5 w-5" />
@@ -101,12 +142,22 @@ export const ProjectTeam: React.FC<ProjectTeamProps> = ({ projectId, currentUser
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
                                              {canManageTeam && user.id !== currentUser.id ? (
-                                                <button
-                                                    onClick={() => handleRemoveMember(user.id)}
-                                                    className="text-red-600 hover:text-red-800 font-semibold"
-                                                >
-                                                    Remove
-                                                </button>
+                                                <div className="flex items-center space-x-4">
+                                                    <button
+                                                        onClick={() => handleOpenPermissions(user)}
+                                                        className="flex items-center text-gray-500 hover:text-brand-blue-600 transition-colors"
+                                                        title="Manage Tab Permissions"
+                                                    >
+                                                        <AdjustmentsHorizontalIcon className="h-5 w-5 mr-1" />
+                                                        <span className="text-xs">Access</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleRemoveMember(user.id)}
+                                                        className="text-red-600 hover:text-red-800 font-semibold text-xs"
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </div>
                                             ) : (
                                                <span className="text-gray-400 text-xs">—</span>
                                             )}

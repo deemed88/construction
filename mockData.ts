@@ -1,4 +1,6 @@
-import { Project, User, UserRole, Task, Expense, Document, Invoice, Agreement, Material, Note, Transaction, PricingTier } from './types';
+
+
+import { Project, User, UserRole, Task, Expense, Document, Invoice, Agreement, Material, Note, Transaction, PricingTier, SchedulePhase, ProgressReport } from './types';
 
 export const mockUsers: User[] = [
   { id: 'u1', name: 'Adebayo Adekunle', email: 'adebayo.adekunle@constructor.com', avatarUrl: 'https://picsum.photos/id/10/50/50', role: UserRole.PROJECT_MANAGER },
@@ -16,7 +18,7 @@ export const mockProjects: Project[] = [
     name: 'Lekki Luxury Apartments',
     location: 'Lagos, Nigeria',
     startDate: '2024-03-01',
-    endDate: '2025-06-30',
+    dueDate: '2025-06-30',
     budget: 50000000,
     actualCost: 35000000,
     status: 'On Track',
@@ -29,7 +31,7 @@ export const mockProjects: Project[] = [
     name: 'Accra Office Complex',
     location: 'Accra, Ghana',
     startDate: '2024-05-15',
-    endDate: '2025-02-28',
+    dueDate: '2025-02-28',
     budget: 35000000,
     actualCost: 20000000,
     status: 'On Track',
@@ -41,7 +43,7 @@ export const mockProjects: Project[] = [
     name: 'Nairobi Tech Hub',
     location: 'Nairobi, Kenya',
     startDate: '2024-02-01',
-    endDate: '2024-12-31',
+    dueDate: '2024-12-31',
     budget: 20000000,
     actualCost: 22500000,
     status: 'Delayed',
@@ -53,7 +55,7 @@ export const mockProjects: Project[] = [
     name: 'Residential Estate Phase 2',
     location: 'Abuja, Nigeria',
     startDate: '2023-11-01',
-    endDate: '2024-09-30',
+    dueDate: '2024-09-30',
     budget: 45000000,
     actualCost: 44000000,
     status: 'Completed',
@@ -65,7 +67,7 @@ export const mockProjects: Project[] = [
     name: 'Cape Town Waterfront Hotel',
     location: 'Cape Town, SA',
     startDate: '2024-08-01',
-    endDate: '2026-01-31',
+    dueDate: '2026-01-31',
     budget: 80000000,
     actualCost: 5000000,
     status: 'Planning',
@@ -77,7 +79,7 @@ export const mockProjects: Project[] = [
     name: 'Ikeja Shopping Mall Extension',
     location: 'Lagos, Nigeria',
     startDate: '2024-06-01',
-    endDate: '2025-03-31',
+    dueDate: '2025-03-31',
     budget: 60000000,
     actualCost: 15000000,
     status: 'On Track',
@@ -272,7 +274,7 @@ export const pricingTiers: PricingTier[] = [
       'Up to 15 Team Members',
       'Core Project Management',
       'Inventory Management',
-      'Document Storage',
+      '5GB Document Storage',
       'Standard Reporting',
     ],
     cta: 'Choose Plan',
@@ -287,7 +289,7 @@ export const pricingTiers: PricingTier[] = [
       'Up to 30 Team Members',
       'Core Project Management',
       'Inventory Management',
-      'Document Storage',
+      '10GB Document Storage',
       'Standard Reporting',
     ],
     cta: 'Start Free Trial',
@@ -295,17 +297,56 @@ export const pricingTiers: PricingTier[] = [
   },
   {
     name: 'Big Project',
-    price: '30,000',
+    price: '50,000',
     description: 'For large-scale projects with extensive teams and requirements.',
     features: [
       '1 Project',
       '30+ Team Members',
       'Core Project Management',
       'Inventory Management',
-      'Document Storage',
+      '20GB Document Storage',
       'Standard Reporting',
     ],
     cta: 'Contact Sales',
     popular: false
+  }
+];
+
+export const mockSchedules: SchedulePhase[] = [
+  // Project 1: Lekki Luxury Apartments
+  { id: 's1', projectId: 'p1', name: 'Site Clearing & Preparation', startDate: '2024-03-01', endDate: '2024-03-15', status: 'Completed', progress: 100 },
+  { id: 's2', projectId: 'p1', name: 'Foundation Work', startDate: '2024-03-16', endDate: '2024-04-30', status: 'Completed', progress: 100 },
+  { id: 's3', projectId: 'p1', name: 'Structural Framework - Ground Floor', startDate: '2024-05-01', endDate: '2024-06-15', status: 'Completed', progress: 100 },
+  { id: 's4', projectId: 'p1', name: 'Structural Framework - 1st Floor', startDate: '2024-06-16', endDate: '2024-08-15', status: 'In Progress', progress: 60 },
+  { id: 's5', projectId: 'p1', name: 'Roofing & Exterior', startDate: '2024-08-16', endDate: '2024-10-30', status: 'Not Started', progress: 0 },
+  { id: 's6', projectId: 'p1', name: 'Internal Finishing', startDate: '2024-11-01', endDate: '2025-04-30', status: 'Not Started', progress: 0 },
+  { id: 's7', projectId: 'p1', name: 'Final Inspection & Handover', startDate: '2025-05-01', endDate: '2025-06-30', status: 'Not Started', progress: 0 },
+
+  // Project 3: Nairobi Tech Hub (Delayed)
+  { id: 's8', projectId: 'p3', name: 'Site Survey & Planning', startDate: '2024-02-01', endDate: '2024-02-28', status: 'Completed', progress: 100 },
+  { id: 's9', projectId: 'p3', name: 'Foundation & Basement', startDate: '2024-03-01', endDate: '2024-05-15', status: 'Completed', progress: 100 },
+  { id: 's10', projectId: 'p3', name: 'Steel Structure Erection', startDate: '2024-05-16', endDate: '2024-07-31', status: 'Delayed', progress: 70 },
+  { id: 's11', projectId: 'p3', name: 'HVAC & Electrical Installation', startDate: '2024-08-01', endDate: '2024-10-31', status: 'In Progress', progress: 10 },
+];
+
+export const mockProgressReports: ProgressReport[] = [
+  {
+    id: 'pr1',
+    projectId: 'p1',
+    title: 'Weekly Site Update - Foundation Phase',
+    date: '2024-04-10',
+    authorId: 'u1',
+    content: 'Foundation pouring is 80% complete. Weather has been favorable. Material delivery for next week confirmed.',
+    percentageComplete: 65,
+    photos: ['https://picsum.photos/id/1/200/150', 'https://picsum.photos/id/2/200/150']
+  },
+  {
+    id: 'pr2',
+    projectId: 'p1',
+    title: 'Monthly Progress Meeting Summary',
+    date: '2024-05-01',
+    authorId: 'u4',
+    content: 'Meeting with the client went well. Approved the new structural changes for the ground floor. Delays in steel delivery might impact the timeline by 2 days.',
+    percentageComplete: 70,
   }
 ];

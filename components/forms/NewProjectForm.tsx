@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 
 interface NewProjectFormProps {
@@ -11,7 +10,7 @@ export const NewProjectForm: React.FC<NewProjectFormProps> = ({ onClose, onAddPr
         name: '',
         location: '',
         startDate: '',
-        endDate: '',
+        dueDate: '',
         budget: ''
     });
 
@@ -47,8 +46,8 @@ export const NewProjectForm: React.FC<NewProjectFormProps> = ({ onClose, onAddPr
                         <input type="date" name="startDate" id="startDate" value={formData.startDate} onChange={handleChange} required className={commonInputClass} />
                     </div>
                     <div>
-                        <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">End Date</label>
-                        <input type="date" name="endDate" id="endDate" value={formData.endDate} onChange={handleChange} required className={commonInputClass} />
+                        <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">Due Date</label>
+                        <input type="date" name="dueDate" id="dueDate" value={formData.dueDate} onChange={handleChange} required className={commonInputClass} />
                     </div>
                 </div>
                  <div>

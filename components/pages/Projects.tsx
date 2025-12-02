@@ -44,8 +44,8 @@ const ProjectCard: React.FC<{ project: Project; onSelectProject: (projectId: str
                 <p className="font-semibold">₦{project.budget.toLocaleString()}</p>
             </div>
              <div>
-                <p className="text-gray-500">End Date</p>
-                <p className="font-semibold">{project.endDate}</p>
+                <p className="text-gray-500">Due Date</p>
+                <p className="font-semibold">{project.dueDate}</p>
             </div>
         </div>
       </div>

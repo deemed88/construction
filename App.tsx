@@ -48,14 +48,14 @@ const App: React.FC = () => {
       case 'dashboard':
         const privilegedRoles = [UserRole.ADMIN, UserRole.COMPANY_OWNER, UserRole.PROJECT_MANAGER];
         return privilegedRoles.includes(currentUser.role) 
-            ? <Dashboard /> 
+            ? <Dashboard currentUser={currentUser} /> 
             : <MemberDashboard currentUser={currentUser} onSelectProject={handleSelectProject} />;
       case 'projects':
         return <Projects onSelectProject={handleSelectProject} currentUser={currentUser} />;
       case 'settings':
         return <Settings onLogout={handleLogout} />;
       default:
-        return <Dashboard />;
+        return <Dashboard currentUser={currentUser} />;
     }
   };
   

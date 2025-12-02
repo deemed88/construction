@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { Project, User, UserRole } from '../../types';
 import { mockProjects } from '../../mockData';
-import { ArrowLeftIcon, BuildingOffice2Icon, UserGroupIcon, ChartBarIcon, ClipboardDocumentListIcon, CurrencyDollarIcon, DocumentDuplicateIcon, FolderIcon, ArchiveBoxIcon, PencilSquareIcon, ArrowsRightLeftIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Tasks } from './Tasks';
 import { Budget } from './Budget';
 import { Documents } from './Documents';
@@ -11,6 +12,9 @@ import { ProjectTeam } from './ProjectTeam';
 import { Inventory } from './Inventory';
 import { Notepad } from './Notepad';
 import { Transactions } from './Transactions';
+import { Schedule } from './Schedule';
+import { ProgressReports } from './ProgressReports';
+import { ALL_PROJECT_TABS, getDefaultVisibleTabs } from './ProjectTabsConfig';
 
 // A simple Project Overview component
 const ProjectOverview: React.FC<{ project: Project }> = ({ project }) => (
@@ -20,7 +24,7 @@ const ProjectOverview: React.FC<{ project: Project }> = ({ project }) => (
             <div><p><span className="font-semibold text-gray-500">Location:</span> {project.location}</p></div>
             <div><p><span className="font-semibold text-gray-500">Status:</span> {project.status}</p></div>
             <div><p><span className="font-semibold text-gray-500">Start Date:</span> {project.startDate}</p></div>
-            <div><p><span className="font-semibold text-gray-500">End Date:</span> {project.endDate}</p></div>
+            <div><p><span className="font-semibold text-gray-500">Due Date:</span> {project.dueDate}</p></div>
             <div><p><span className="font-semibold text-gray-500">Budget:</span> ₦{project.budget.toLocaleString()}</p></div>
             <div><p><span className="font-semibold text-gray-500">Actual Cost:</span> ₦{project.actualCost.toLocaleString()}</p></div>
         </div>
@@ -42,40 +46,9 @@ interface ProjectDetailProps {
     currentUser: User;
 }
 
-type SubPage = 'overview' | 'tasks' | 'budget' | 'transactions' | 'inventory' | 'documents' | 'invoices' | 'reports' | 'team' | 'notepad';
-
-const subNavItemsOriginal: { id: SubPage, label: string, icon: React.ElementType }[] = [
-    { id: 'overview', label: 'Overview', icon: BuildingOffice2Icon },
-    { id: 'tasks', label: 'Tasks', icon: ClipboardDocumentListIcon },
-    { id: 'budget', label: 'Budget', icon: CurrencyDollarIcon },
-    { id: 'transactions', label: 'Transactions', icon: ArrowsRightLeftIcon },
-    { id: 'inventory', label: 'Inventory', icon: ArchiveBoxIcon },
-    { id: 'documents', label: 'Documents', icon: FolderIcon },
-    { id: 'invoices', label: 'Invoices', icon: DocumentDuplicateIcon },
-    { id: 'team', label: 'Team', icon: UserGroupIcon },
-    { id: 'notepad', label: 'Notepad', icon: PencilSquareIcon },
-    { id: 'reports', label: 'Reports', icon: ChartBarIcon },
-];
-
 export const ProjectDetail: React.FC<ProjectDetailProps> = ({ projectId, onBack, currentUser }) => {
-    const [activeSubPage, setActiveSubPage] = useState<SubPage>('overview');
+    const [activeSubPage, setActiveSubPage] = useState<string>('overview');
     const project = mockProjects.find(p => p.id === projectId);
-
-    const subNavItems = subNavItemsOriginal.filter(item => {
-        // Rules for CLIENT
-        if (currentUser.role === UserRole.CLIENT) {
-            if (item.id === 'budget' || item.id === 'transactions' || item.id === 'tasks') {
-                return false;
-            }
-        }
-        // Rules for TEAM_MEMBER
-        if (currentUser.role === UserRole.TEAM_MEMBER) {
-            if (item.id === 'budget') {
-                return false;
-            }
-        }
-        return true;
-    });
 
     if (!project) {
         return (
@@ -88,8 +61,24 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ projectId, onBack,
         );
     }
 
+    // Determine visible tabs based on permissions
+    const visibleTabIds = project.memberPermissions?.[currentUser.id] ?? getDefaultVisibleTabs(currentUser.role);
+    const subNavItems = ALL_PROJECT_TABS.filter(item => visibleTabIds.includes(item.id));
+
+    // Ensure activeSubPage is valid, else fallback to overview or first available
+    if (!visibleTabIds.includes(activeSubPage) && visibleTabIds.length > 0) {
+        // If 'overview' is available, default to it, otherwise first available
+        if (visibleTabIds.includes('overview')) {
+            setActiveSubPage('overview');
+        } else {
+            setActiveSubPage(visibleTabIds[0]);
+        }
+    }
+
     const renderSubPage = () => {
         switch (activeSubPage) {
+            case 'progress-reports': return <ProgressReports projectId={projectId} currentUser={currentUser} />;
+            case 'schedule': return <Schedule projectId={projectId} currentUser={currentUser} />;
             case 'tasks': return <Tasks projectId={projectId} currentUser={currentUser} />;
             case 'budget': return <Budget projectId={projectId} />;
             case 'transactions': return <Transactions projectId={projectId} currentUser={currentUser} />;

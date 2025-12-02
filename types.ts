@@ -1,3 +1,4 @@
+
 export enum UserRole {
   ADMIN = 'Admin',
   COMPANY_OWNER = 'Company Owner',
@@ -19,13 +20,14 @@ export interface Project {
   name: string;
   location: string;
   startDate: string;
-  endDate: string;
+  dueDate: string;
   budget: number;
   actualCost: number;
   status: 'On Track' | 'Delayed' | 'Completed' | 'Planning';
   progress: number;
   members: User[];
   clientId?: string;
+  memberPermissions?: Record<string, string[]>; // userId -> array of allowed tab IDs
 }
 
 export interface Task {
@@ -36,6 +38,7 @@ export interface Task {
   assignee?: User;
   dueDate: string;
   priority: 'High' | 'Medium' | 'Low';
+  audioMemoUrl?: string;
 }
 
 export interface Expense {
@@ -131,4 +134,25 @@ export interface PricingTier {
   features: string[];
   cta: string;
   popular: boolean;
+}
+
+export interface SchedulePhase {
+  id: string;
+  projectId: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  status: 'Not Started' | 'In Progress' | 'Completed' | 'Delayed';
+  progress: number;
+}
+
+export interface ProgressReport {
+  id: string;
+  projectId: string;
+  title: string;
+  date: string;
+  authorId: string;
+  content: string;
+  percentageComplete: number;
+  photos?: string[];
 }

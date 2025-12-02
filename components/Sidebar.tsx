@@ -1,6 +1,6 @@
 
 import React, { useMemo } from 'react';
-import { BuildingOffice2Icon, Cog6ToothIcon, HomeIcon, UserGroupIcon, XMarkIcon, Bars3Icon } from '@heroicons/react/24/outline';
+import { BuildingOffice2Icon, Cog6ToothIcon, HomeIcon, XMarkIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import { User, UserRole } from '../types';
 
 interface SidebarProps {

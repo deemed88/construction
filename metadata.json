@@ -1,5 +1,7 @@
 {
   "name": "ConstructPro Africa",
   "description": "A cloud-based Construction Project Management SaaS platform for African contractors to plan, track, and manage projects efficiently, replacing manual spreadsheets and WhatsApp coordination with a mobile-friendly, collaborative tool.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [
+    "microphone"
+  ]
 }
